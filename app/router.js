@@ -1,19 +1,29 @@
-module.exports = {
-  "notFound":function (req, res, reqData){
-    return new Promise(function (resolve, reject) {
-      const response = {
-        statusCode: 404,
-        response: {msg:'recurso no encontrado: ' + reqData.method.toUpperCase() + ' /' + reqData.path}
-      };
-      resolve(response);
-    })
-  },
-  "users": {
-    "get": function () {
-      
-    },
-    "post": function (req, res) {
-      
-    }
-  }
-};
+const notFound = require('./handlers/notFound');
+const ping = require('./handlers/ping');
+const userHandlers = require('./handlers/users');
+const tokenHandlers = require('./handlers/tokens');
+
+const router = {};
+
+router.notFound = notFound;
+
+router.ping = {};
+router.ping.get = ping;
+
+router.user = {};
+router.user.list= {};
+router.user.get = userHandlers.getUser;
+router.user.post = userHandlers.createUser;
+router.user.put = userHandlers.updateUser;
+router.user.delete = userHandlers.removeUser;
+
+router.users = {};
+router.users.get = userHandlers.getUsers;
+
+router.tokens = {};
+router.tokens.post = tokenHandlers.createToken;
+router.tokens.get = tokenHandlers.getTokens;
+router.tokens.put = tokenHandlers.editToken;
+router.tokens.delete = tokenHandlers.removeToken;
+
+module.exports = router;

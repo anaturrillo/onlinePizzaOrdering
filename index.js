@@ -4,12 +4,8 @@ const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const path = require('path');
 const router = require('./app/router');
-const helpers = require('./app/helpers');
-
-const startServer = function () {
-
-};
-
+const helpers = require('./app/helpers/index');
+const _log = require('./app/log');
 
 const server = http.createServer(function (req, res) {
   const reqData = url.parse(req.url, true);
@@ -17,19 +13,24 @@ const server = http.createServer(function (req, res) {
   const path = reqData.pathname.replace(/^\/+|\/+$/g,'');
   const query = reqData.query;
   const method = req.method.toLowerCase();
+  const headers = req.headers;
+
+  const decoder = new StringDecoder('utf-8');
+  let buffer = '';
 
   req.on('data', function (data) {
-    debugger
+    buffer += decoder.write(data);
   });
   
   req.on('end', function () {
-    let handler = router[path] && router[path][method] ? router[path][method] : router.notFound;
+    buffer += decoder.end();
+    const body = helpers.parseJsonToObject(buffer);
 
-    const requestData = {
-      path, method
-    };
+    const handler = router[path] && router[path][method] ? router[path][method] : router.notFound;
 
-    handler(req, res, requestData)
+    const requestData = { path, method: method.toUpperCase(), body , query, headers};
+
+    handler(requestData)
       .then(function (data) {
         const statusCode = typeof(data.statusCode) === 'number' ? data.statusCode : 200;
         const response = typeof(data.response) === 'object' ? data.response : {};
@@ -38,22 +39,18 @@ const server = http.createServer(function (req, res) {
         res.writeHead(statusCode);
         res.end(JSON.stringify(response));
       })
-      .catch(function (e) {
-        res.setHeader('Content-Type', 'application/json');
-        res.writeHead(500);
-        res.end('the error has been logged to the system');
+      .catch(_log)
+      .catch(console.error)
+  });
 
-        const errorMsg = 'An error occurred trying to send response. A 500 error has been sent to requester.';
-
-        // @TODO log error to file
-        console.log(errorMsg, e)
-      })
+  req.on('error', function (a) {
+    console.log('error en req', a);
+    debugger
   })
-
 });
 
 server.listen(5000, function () {
-  console.log('Server listening at port 5000')
+  console.log('\x1b[33m%s\x1b[0m', 'Server listening at port 5000')
 });
 
 
