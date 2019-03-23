@@ -44,6 +44,7 @@ const read = function ({collection, id}) {
   const file = init({collection, id});
 
   return file.read([])
+    .then(([file, fileId]) => [parseJsonToObject(file), fileId])
 
 };
 

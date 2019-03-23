@@ -20,10 +20,10 @@ router.user.delete = userHandlers.removeUser;
 router.users = {};
 router.users.get = userHandlers.getUsers;
 
-router.tokens = {};
-router.tokens.post = tokenHandlers.createToken;
-router.tokens.get = tokenHandlers.getTokens;
-router.tokens.put = tokenHandlers.editToken;
-router.tokens.delete = tokenHandlers.removeToken;
+router.token = {};
+router.token.post = tokenHandlers.createToken;
+router.token.get = tokenHandlers.getTokens;
+router.token.put = tokenHandlers.editToken;
+router.token.delete = tokenHandlers.removeToken;
 
 module.exports = router;

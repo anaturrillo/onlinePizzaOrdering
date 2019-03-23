@@ -12,14 +12,25 @@ const createError = function (statusCode, path, msg, error, data) {
   return {
     statusCode: statusCode || 400,
     response: {
-      error: (msg && error && errorMessage[error.code] && `${msg} [${errorMessage[error.code]}]` ) || msg || (error && (errorMessage[error.code] || error.msg)) || 'error indefinido',
-      failedAt: path,
+      error: (msg && error && (errorMessage[error.code] || error.msg ) && `${msg} [${errorMessage[error.code] || error.msg}]` ) || msg || (error && (errorMessage[error.code] || error.msg)) || 'error indefinido',
+      failed: path,
       info: {
         sentData: data,
         error
       }
     }
   }
+};
+
+const createRandomString = function (strLength) {
+  const possibleCharacters = 'abcdefghijkrstuvwxyz0123456789';
+
+  let str = '';
+
+  for (let i = 1; i <= strLength; i++) {
+    str += possibleCharacters.charAt(Math.floor(Math.random()*possibleCharacters.length));
+  }
+  return str;
 };
 
 const errorToObject = e => Object.getOwnPropertyNames(e)
@@ -49,4 +60,4 @@ const exclude = key => obj => {
   return obj
 };
 
-module.exports = {createError, parseJsonToObject, createResponse, errorToObject, hashPassword, exclude};
+module.exports = {createError, parseJsonToObject, createResponse, errorToObject, hashPassword, exclude, createRandomString};
