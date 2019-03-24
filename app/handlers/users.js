@@ -5,10 +5,11 @@ const _validate = require('./../helpers/validate');
 const _exclude = require('./../helpers').exclude;
 const rmPass = _exclude('password');
 const errorToObject = require('./../helpers').errorToObject;
-const parseJsonToObject = require('./../helpers').parseJsonToObject;
 
 const getUsers = function (data) {
   return _data.list('users')
+    .then(users => createResponse(200, 'ok', users.map(e => e.trim().replace('.json', ''))))
+    .catch(e => createError(e.statusCode || 400, `${data.method} /${data.path}`, 'Unable to get users', errorToObject(e), data))
 };
 
 /**
@@ -55,6 +56,9 @@ const createUser = function (data) {
     .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to create user', errorToObject(e), specs))
 };
 
+/**
+ * required fields: email, token, one of: name, address, password
+ */
 const updateUser = function (data) {
   const token = data.headers.token;
   const name = _validate.name(data.body.name);
@@ -96,4 +100,4 @@ const removeUser = function (data) {
     .catch(e => createError(e.statusCode || 400, `${data.method} /${data.path}`, 'Unable to remove user', errorToObject(e), userSpecs))
 };
 
-module.exports = {getUser, getUsers, createUser, updateUser, removeUser};
+module.exports = { getUser, getUsers, createUser, updateUser, removeUser };

@@ -26,7 +26,7 @@ const server = http.createServer(function (req, res) {
     buffer += decoder.end();
     const body = helpers.parseJsonToObject(buffer);
 
-    const handler = router[path] && router[path][method] ? router[path][method] : router.notFound;
+    let handler = router[path] && router[path][method] ? router[path][method] : router.notFound;
 
     const requestData = { path, method: method.toUpperCase(), body , query, headers};
 

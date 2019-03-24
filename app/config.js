@@ -1,5 +1,5 @@
 module.exports = {
   port: 5000,
-  hashingSecret: 'thisIsASecret'
-
+  hashingSecret: 'thisIsASecret',
+  adminToken: 'admin000'
 };

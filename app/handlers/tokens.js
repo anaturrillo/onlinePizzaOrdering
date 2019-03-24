@@ -33,15 +33,28 @@ const createToken = function (data) {
 };
 
 const getTokens = function (data) {
-
+  return Promise.resolve(createResponse(501,'Service not implemented yet, sorry :)'))
 };
 
 const editToken = function (data) {
-
+  return Promise.resolve(createResponse(501,'Service not implemented yet, sorry :)'))
 };
 
 const removeToken = function (data) {
+  const token = data.headers.token;
+  const email = _validate.email(data.query.email);
 
+  if (!token || !email) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required field',null, data))
+
+  const specs = {
+    collection:'tokens',
+    id: token
+  };
+
+  return _validate.token(token, email)
+    .then(_ => _data.remove(specs))
+    .then(_ => createResponse(200, 'Token removed successfully', {forUser: email, token: token}))
+    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to create token', _errorToObject(e), specs))
 };
 
 module.exports = {createToken, getTokens, editToken, removeToken};

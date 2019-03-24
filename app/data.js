@@ -1,7 +1,5 @@
 const path = require('path');
 const createResponse = require('./helpers').createResponse;
-const createError = require('./helpers').createError;
-const errorToObject = require('./helpers').errorToObject;
 const parseJsonToObject = require('./helpers').parseJsonToObject;
 const {fsOpen, fsClose, fsWrite, fsRead, fsUnlink, fsTruncate, fsReadDir} = require('./helpers/promisifiedFs');
 
@@ -69,7 +67,6 @@ const list = function (collection, response) {
   const dir = init({collection});
 
   return dir.list()
-    .then(users => createResponse(200, 'ok', users.map(e => e.trim().replace('.json', ''))))
 };
 
 module.exports = {create, read, update, remove, list};
