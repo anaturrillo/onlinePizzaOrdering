@@ -8,7 +8,7 @@ const errorToObject = require('./../helpers').errorToObject;
 
 const getUsers = function (data) {
   return _data.list('users')
-    .then(users => createResponse(200, 'ok', users.map(e => e.trim().replace('.json', ''))))
+    .then(users => createResponse(200, 'ok', users))
     .catch(e => createError(e.statusCode || 400, `${data.method} /${data.path}`, 'Unable to get users', errorToObject(e), data))
 };
 
@@ -46,7 +46,7 @@ const createUser = function (data) {
   const specs = {
     collection: 'users',
     id: email,
-    item: {name, address, email, password}
+    item: {name, address, password}
   };
 
   return _data.create(specs)
@@ -91,11 +91,25 @@ const removeUser = function (data) {
   if (!email) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Email is invalid or missing', null, data));
 
   const userSpecs = {id: data.query.email, collection: 'users'};
+  const cartSpecs = {id: data.query.email, collection: 'carts'};
   const userTokenSpecs = {collection:'tokens', id: token};
 
   return _validate.token(token, email)
-    .then(_ => _data.remove(userSpecs))
-    .then(_ => _data.remove(userTokenSpecs))
+    .then(function () {
+      const user = _data.read(userSpecs).catch(e => false);
+      const tokens = _data.read(userTokenSpecs).catch(e => false);
+      const carts = _data.read(cartSpecs).catch(e => false);
+
+      return Promise.all([user, tokens, carts])
+    })
+    .then(function ([user, tokens, carts]) {
+      const promises = [];
+      if (user) promises.concat(_data.remove(userSpecs));
+      if (tokens) promises.concat(_data.remove(userTokenSpecs));
+      if (carts) promises.concat(_data.remove(cartSpecs));
+
+      return Promise.all(promises)
+    })
     .then(_ => createResponse(200, 'Document deleted successfully', {userRemoved: userSpecs.id}))
     .catch(e => createError(e.statusCode || 400, `${data.method} /${data.path}`, 'Unable to remove user', errorToObject(e), userSpecs))
 };

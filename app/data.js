@@ -30,6 +30,7 @@ const init = ({collection, id, item, flag}) => {
 };
 
 const create = function ({collection, item, id}) {
+  item = Object.assign(item, {id});
   const file = init({collection, id, item, flag:'wx'});
 
   return file.open()
@@ -47,7 +48,6 @@ const read = function ({collection, id}) {
 };
 
 const update = function ({collection, item, id}) {
-  delete item.email;
   const file = init({collection, id, item, flag:'r+'});
 
   return file.open()
@@ -63,10 +63,11 @@ const remove = function ({collection, id}) {
 
 };
 
-const list = function (collection, response) {
+const list = function (collection) {
   const dir = init({collection});
 
   return dir.list()
+    .then(list => list.map(e => e.trim().replace('.json', '')))
 };
 
 module.exports = {create, read, update, remove, list};

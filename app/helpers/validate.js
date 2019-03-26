@@ -43,13 +43,25 @@ const validatePassword = function (password, email) {
   
 };
 
+const validateMenuItem = function (item) {
+  return _data.read({collection: 'menu', id: item.itemId})
+    .then(_ => item)
+    .catch(function (e) {
+      if (e.code === 'ENOENT') throw {msg: 'Menu item not found: ' + item.itemId};
+      else throw e
+    })
+};
+
 const validate = {
   email: email => typeof email === 'string' && email.includes('@') && email.split('@')[1].includes('.') && email,
   name: name => typeof name === 'string' && name.trim(),
   address: address => typeof address === 'string' && address,
   passwordToSet: password => typeof password === 'string' && password.trim().length > 0 && hashPassword(password.trim()),
   price: price => typeof price === 'number' && price > 0 && price,
+  amount: amount => typeof amount === 'number' && amount > 0 && amount,
   string: string => typeof string === 'string' && string.trim().length > 0 && string,
+  cart: (cart, email) => cart.email === email && cart,
+  menuItem: validateMenuItem,
   password: validatePassword,
   token: validateToken,
   isAdmin: token => token === _config.adminToken

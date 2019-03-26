@@ -28,7 +28,7 @@ const createToken = function (data) {
         throw {msg: 'Wrong password'}
       }
     })
-    .then(_ => createResponse(200, 'Token created successfully', {forUser: email, token: tokenId}))
+    .then(token => createResponse(200, 'Token created successfully', {forUser: email, token: token.id}))
     .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to create token', _errorToObject(e), specs))
 };
 

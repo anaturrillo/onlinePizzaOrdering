@@ -3,6 +3,8 @@ const ping = require('./handlers/ping');
 const userHandlers = require('./handlers/users');
 const tokenHandlers = require('./handlers/tokens');
 const menuHandlers = require('./handlers/menu');
+const cartHandlers = require('./handlers/carts');
+const paymentHandlers = require('./handlers/payment');
 
 const router = {};
 
@@ -27,14 +29,36 @@ router.token.get = tokenHandlers.getTokens;
 router.token.put = tokenHandlers.editToken;
 router.token.delete = tokenHandlers.removeToken;
 
-router.menu = {};
-router.menu.get = menuHandlers.getMenuItems;
-router.menu.post = menuHandlers.createMenuItem;
-router.menu.put = menuHandlers.editMenuItem;
-router.menu.delete = menuHandlers.removeMenuItem;
+router.login = {};
+router.login.post = tokenHandlers.createToken;
 
-router['menu/item'] = {};
-router['menu/item'].get = menuHandlers.getMenuItems;
+router.logout = {};
+router.logout.post = tokenHandlers.removeToken;
+
+router.menuItem = {};
+router.menuItem.get = menuHandlers.getMenuItem;
+router.menuItem.post = menuHandlers.createMenuItem;
+router.menuItem.put = menuHandlers.editMenuItem;
+router.menuItem.delete = menuHandlers.removeMenuItem;
+
+router.menuItems = {};
+router.menuItems.get = menuHandlers.getMenuItems;
+
+
+router.cart = {};
+router.cart.get = cartHandlers.getCart;
+router.cart.post = cartHandlers.createCart;
+router.cart.delete = cartHandlers.removeCart;
+
+router['cart/add'] = {};
+router['cart/add'].put = cartHandlers.addToCart;
+
+router['cart/remove'] = {};
+router['cart/remove'].put = cartHandlers.removeFromCart;
+
+router.payment = {};
+router.payment.post = paymentHandlers.pay;
+
 
 
 module.exports = router;
