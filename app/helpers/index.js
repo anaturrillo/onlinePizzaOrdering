@@ -1,5 +1,6 @@
 const _config = require('../config');
 const crypto = require('crypto');
+const _log = require('./../log');
 
 const errorMessage = {
   ENOENT: 'not found',
@@ -9,7 +10,7 @@ const errorMessage = {
 const createError = function (statusCode, path, msg, error, data) {
   //@TODO discriminar los casos en los que hay que mandar 500
   //@TODO no mandar .info en NODE_ENV prod
-  return {
+  const errorData = {
     statusCode: statusCode || 400,
     response: {
       error: (msg && error && (errorMessage[error.code] || error.msg ) && `${msg} [${errorMessage[error.code] || error.msg}]` ) || msg || (error && (errorMessage[error.code] || error.msg)) || 'error indefinido',
@@ -19,7 +20,9 @@ const createError = function (statusCode, path, msg, error, data) {
         error
       }
     }
-  }
+  };
+
+  return _log(errorData).then(_ => errorData);
 };
 
 const createRandomString = function (strLength) {

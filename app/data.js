@@ -1,5 +1,4 @@
 const path = require('path');
-const createResponse = require('./helpers').createResponse;
 const parseJsonToObject = require('./helpers').parseJsonToObject;
 const {fsOpen, fsClose, fsWrite, fsRead, fsUnlink, fsTruncate, fsReadDir} = require('./helpers/promisifiedFs');
 
