@@ -6,9 +6,13 @@ const _config = require('./../config');
 
 const validateToken = function (token, user) {
   const userToken = typeof token === 'string' && token;
+  if (!token) return Promise.reject(createError(400, 'validateToken', 'Missing required fields', null, {token, user}));
+
+  if (validate.isAdmin(token)) return Promise.resolve();
+
   const userName = typeof user === 'string' && user;
 
-  if (!token || !userName) return Promise.reject(createError(400, 'validateToken', 'Missing required fields', null, {token, user}));
+  if (!userName) return Promise.reject(createError(400, 'validateToken', 'Missing required fields', null, {token, user}));
 
   const specs = {
     collection:'tokens',

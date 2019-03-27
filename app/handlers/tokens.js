@@ -54,7 +54,7 @@ const removeToken = function (data) {
   return _validate.token(token, email)
     .then(_ => _data.remove(specs))
     .then(_ => createResponse(200, 'Token removed successfully', {forUser: email, token: token}))
-    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to create token', _errorToObject(e), specs))
+    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to remove token', _errorToObject(e), specs))
 };
 
 module.exports = {createToken, getTokens, editToken, removeToken};

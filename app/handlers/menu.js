@@ -16,7 +16,7 @@ const getMenuItem = function (data) {
   const email = _validate.email(data.query.email);
   const itemId = data.query.id;
 
-  if ( !email || !itemId) return Promise.resolve(createError(400, path, 'Missing required field', null, data));
+  if ( (!_validate.isAdmin(token) &&  !email ) || !itemId) return Promise.resolve(createError(400, path, 'Missing required field', null, data));
 
   const specs = {
     collection: 'menu',
@@ -40,7 +40,7 @@ const getMenuItems = function (data) {
   const token = data.headers.token;
   const email = _validate.email(data.query.email);
 
-  if ( !email ) return Promise.resolve(createError(400, path, 'Missing required field', null, data));
+  if (!_validate.isAdmin(token) &&  !email ) return Promise.resolve(createError(400, path, 'Missing required field', null, data));
 
   return _validate.token(token, email)
     .then(_ => _data.list('menu'))

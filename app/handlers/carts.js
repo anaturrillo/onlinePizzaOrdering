@@ -101,7 +101,7 @@ const addToCart = function (data) {
 const removeFromCart = function (data) {
   const email = _validate.email(data.body.email);
   const token = data.headers.token;
-  const itemId = data.body.itemId;
+  const itemId = data.body.id;
 
   if (!email || !itemId) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
 

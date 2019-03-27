@@ -7,6 +7,9 @@ const rmPass = _exclude('password');
 const errorToObject = require('./../helpers').errorToObject;
 
 const getUsers = function (data) {
+
+  if (!_validate.isAdmin(data.headers.token) ) return Promise.resolve(createError(403, `${data.method} /${data.path}`, 'You need an admin token to get requested data', {}, {}));
+
   return _data.list('users')
     .then(users => createResponse(200, 'ok', users))
     .catch(e => createError(e.statusCode || 400, `${data.method} /${data.path}`, 'Unable to get users', errorToObject(e), data))
@@ -20,14 +23,10 @@ const getUser = function (data) {
   const token = data.headers.token;
 
   if (!email) return Promise.resolve(createError(400, `${data.method} /${data.path} - query: ${data.query.email}`, 'Missing required fieldsemail', null, data));
-  //if (!token) return Promise.resolve(createError(403, 'Missing or invalid token'));
   const specs = {id: email, collection: 'users'};
 
   return _validate.token(token, email)
-    .then(function (isTokenValid) {
-      if (isTokenValid) return _data.read(specs);
-
-    })
+    .then(_ => _data.read(specs))
     .then( ([fileContent, fileId]) => createResponse(200, 'ok', rmPass(fileContent)) )
     .catch(e => createError(e.statusCode || 400, `${data.method} /${data.path} - ${data.query.email}`, 'Unable to get user', errorToObject(e), specs))
 };
@@ -50,9 +49,7 @@ const createUser = function (data) {
   };
 
   return _data.create(specs)
-    .then(function (item) {
-      return createResponse(200, 'User has been successfully created', rmPass(item))
-    })
+    .then(item => createResponse(200, 'User has been successfully created', rmPass(item)))
     .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to create user', errorToObject(e), specs))
 };
 
@@ -110,7 +107,7 @@ const removeUser = function (data) {
 
       return Promise.all(promises)
     })
-    .then(_ => createResponse(200, 'Document deleted successfully', {userRemoved: userSpecs.id}))
+    .then(_ => createResponse(200, 'User deleted successfully', {userRemoved: userSpecs.id}))
     .catch(e => createError(e.statusCode || 400, `${data.method} /${data.path}`, 'Unable to remove user', errorToObject(e), userSpecs))
 };
 
