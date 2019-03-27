@@ -1,26 +1,149 @@
-# Homework Assignment #2
+# Node.js Master Class Homework Assignment #2
 
-###The Assignment (Scenario):
-
-
-
-You are building the API for a pizza-delivery company. Don't worry about a frontend, just build the API. Here's the spec from your project manager: 
-
-1. New users can be created, their information can be edited, and they can be deleted. We should store their name, email address, and street address.
-
-2. Users can log in and log out by creating or destroying a token.
-
-3. When a user is logged in, they should be able to GET all the possible menu items (these items can be hardcoded into the system). 
-
-4. A logged-in user should be able to fill a shopping cart with menu items
-
-5. A logged-in user should be able to create an order. You should integrate with the Sandbox of Stripe.com to accept their payment. Note: Use the stripe sandbox for your testing. Follow this link and click on the "tokens" tab to see the fake tokens you can use server-side to confirm the integration is working: [https://stripe.com/docs/testing#cards](https://stripe.com/docs/testing#cards)
-
-6. When an order is placed, you should email the user a receipt. You should integrate with the sandbox of Mailgun.com for this. Note: Every Mailgun account comes with a sandbox email account domain (whatever@sandbox123.mailgun.org) that you can send from by default. So, there's no need to setup any DNS for your domain for this task [https://documentation.mailgun.com/en/latest/faqs.html#how-do-i-pick-a-domain-name-for-my-mailgun-account](https://documentation.mailgun.com/en/latest/faqs.html#how-do-i-pick-a-domain-name-for-my-mailgun-account)
-
-__Important Note:__ If you use external libraries (NPM) to integrate with Stripe or Mailgun, you will not pass this assignment. You must write your API calls from scratch. Look up the "Curl" documentation for both APIs so you can figure out how to craft your API calls. 
+##API documentation:
 
 
-__This is an open-ended assignment. You may take any direction you'd like to go with it, as long as your project includes the requirements. It can include anything else you wish as well.__ 
+### Flow
+To run the API you need to add a config.js file in the app folder. 
+In this file you need to export an object with to folowing structure (if you want, populated according to the environment the app is running in):
+```
+{
+  port: [PORT],
+  hashingSecret: [HASH SECRET],
+  adminToken: [An admin token],
+  paymentApiKey: [payment tool api key],
+  mailDomain: [mailing tool domain],
+  mailApiKey: [mailing tool api key]
+}
 
-And please: Don't forget to document how a client should interact with the API you create!
+```
+
+The intended api flow is as follows:
+As an admin (you will need an admin token):
+- Create menu items
+
+As a user:
+1) create User
+2) log user (you'll be given a token)
+3) create cart (cart will be create with user email, only one cart is allowed per user)
+4) add items to cart.
+5) make the order (user will be charged and will receive an email with details of his ordering)
+
+### Services:
+
+```POST /user ```
+Creates a user.
+Required fields: 
+- __body:__ name, email, address, password
+
+```GET /user?email=[user email] ```
+Returns the requested user.
+Required fields:
+- __headers:__ token [admin or user token]
+- __query:__ email
+
+```PUT /user ```
+Edits user fields.
+Required fields: 
+- __headers:__ token [admin or user token]
+- __body:__ email, one of: name, address, password
+
+```DELETE /user?email=[user email] ```
+Remove selected user.
+Required fields:
+- __headers:__ token [admin or user token]
+- __query:__ email
+
+```GET /users ```
+Lits all users.
+Required fields:
+- __headers:__ token [admin]
+
+```POST /token ``` || ```POST /login ```
+Creates a session, returns user token. 
+Required fields:
+- __body:__ email
+- __body:__ password
+
+
+```DELETE /token ``` || ```POST /logout ```
+Creates a session, returns user token. 
+Required fields:
+- __query:__ email
+- __headers:__ token [admin or user token]
+
+```POST /menuItem ```
+Creates a menu item.
+Required fields:
+- __headers:__ token [admin]
+- __body:__ name
+- __body:__ price
+- __body:__ description
+
+```PUT /menuItem ```
+Edits a menu item.
+Required fields:
+- __headers:__ token [admin]
+- __body:__ one of: name, price, description 
+- __query:__ id [item id to edit]
+
+```GET /menuItem ```
+Retrieves a menu item.
+Required fields:
+- __headers:__ token [admin or user token]
+- __body:__ one of: name, price, description 
+- __query:__ id [item id to edit]
+- __query:__ email [user email if is not admin]
+
+```GET /menuItems ```
+Lists all menu items.
+Required fields:
+- __headers:__ token [admin or user token]
+- __query:__ email [user email if is not admin]
+
+```DELETE /menuItem ```
+Edits a menu item.
+Required fields:
+- __headers:__ token [admin]
+- __query:__ id [item id to remove]
+
+
+```POST /cart ```
+Creates a new cart. Only one cart is allowed per user.
+Required fields:
+- __headers:__ token [user]
+- __body:__ email
+
+```GET /cart ```
+Retrieves a cart. Cart id will match user email.
+Required fields:
+- __headers:__ token [user]
+- __query:__ email
+
+```PUT /cart/add ```
+Adds an item to the user's cart.
+Required fields:
+- __headers:__ token [user]
+- __body:__ email
+- __body:__ item.itemId
+- __body:__ item.amount
+
+```PUT /cart/remove ```
+Removes an item from user's cart.
+Required fields:
+- __headers:__ token [user]
+- __body:__ email
+- __body:__ id [cart's item id]
+
+```DELETE /cart ```
+Removes user's cart.
+Required fields:
+- __headers:__ token [user]
+- __query:__ email
+
+```POST /payment ```
+Process cart payment.
+Required fields:
+- __headers:__ token [user]
+- __headers:__ payment_token [token created with payment processing tool]
+- __body:__ email
