@@ -32,47 +32,55 @@ As a user:
 ### Services:
 
 ```POST /user ```
+
 Creates a user.
 Required fields: 
 - __body:__ name, email, address, password
 
 ```GET /user?email=[user email] ```
+
 Returns the requested user.
 Required fields:
 - __headers:__ token [admin or user token]
 - __query:__ email
 
 ```PUT /user ```
+
 Edits user fields.
 Required fields: 
 - __headers:__ token [admin or user token]
 - __body:__ email, one of: name, address, password
 
 ```DELETE /user?email=[user email] ```
+
 Remove selected user.
 Required fields:
 - __headers:__ token [admin or user token]
 - __query:__ email
 
 ```GET /users ```
+
 Lits all users.
 Required fields:
 - __headers:__ token [admin]
 
-```POST /token ``` || ```POST /login ```
+```POST /token ``` or ```POST /login ```
+
 Creates a session, returns user token. 
 Required fields:
 - __body:__ email
 - __body:__ password
 
 
-```DELETE /token ``` || ```POST /logout ```
+```DELETE /token ``` or ```POST /logout ```
+
 Creates a session, returns user token. 
 Required fields:
 - __query:__ email
 - __headers:__ token [admin or user token]
 
 ```POST /menuItem ```
+
 Creates a menu item.
 Required fields:
 - __headers:__ token [admin]
@@ -81,6 +89,7 @@ Required fields:
 - __body:__ description
 
 ```PUT /menuItem ```
+
 Edits a menu item.
 Required fields:
 - __headers:__ token [admin]
@@ -88,6 +97,7 @@ Required fields:
 - __query:__ id [item id to edit]
 
 ```GET /menuItem ```
+
 Retrieves a menu item.
 Required fields:
 - __headers:__ token [admin or user token]
@@ -96,12 +106,14 @@ Required fields:
 - __query:__ email [user email if is not admin]
 
 ```GET /menuItems ```
+
 Lists all menu items.
 Required fields:
 - __headers:__ token [admin or user token]
 - __query:__ email [user email if is not admin]
 
 ```DELETE /menuItem ```
+
 Edits a menu item.
 Required fields:
 - __headers:__ token [admin]
@@ -109,18 +121,21 @@ Required fields:
 
 
 ```POST /cart ```
+
 Creates a new cart. Only one cart is allowed per user.
 Required fields:
 - __headers:__ token [user]
 - __body:__ email
 
 ```GET /cart ```
+
 Retrieves a cart. Cart id will match user email.
 Required fields:
 - __headers:__ token [user]
 - __query:__ email
 
 ```PUT /cart/add ```
+
 Adds an item to the user's cart.
 Required fields:
 - __headers:__ token [user]
@@ -129,6 +144,7 @@ Required fields:
 - __body:__ item.amount
 
 ```PUT /cart/remove ```
+
 Removes an item from user's cart.
 Required fields:
 - __headers:__ token [user]
@@ -136,12 +152,14 @@ Required fields:
 - __body:__ id [cart's item id]
 
 ```DELETE /cart ```
+
 Removes user's cart.
 Required fields:
 - __headers:__ token [user]
 - __query:__ email
 
 ```POST /payment ```
+
 Process cart payment.
 Required fields:
 - __headers:__ token [user]
