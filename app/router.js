@@ -13,42 +13,41 @@ router.notFound = notFound;
 router.ping = {};
 router.ping.get = ping;
 
-router.user = {};
-router.user.list= {};
-router.user.get = userHandlers.getUser;
-router.user.post = userHandlers.createUser;
-router.user.put = userHandlers.updateUser;
-router.user.delete = userHandlers.removeUser;
+router['api/users'] = {};
+router['api/users'].get = userHandlers.getUser;
+router['api/users'].post = userHandlers.createUser;
+router['api/users'].put = userHandlers.updateUser;
+router['api/users'].delete = userHandlers.removeUser;
 
-router.users = {};
-router.users.get = userHandlers.getUsers;
+router['api/users/list'] = {};
+router['api/users/list'].get = userHandlers.getUsers;
 
-router.token = {};
-router.token.post = tokenHandlers.createToken;
-router.token.get = tokenHandlers.getTokens;
-router.token.put = tokenHandlers.editToken;
-router.token.delete = tokenHandlers.removeToken;
+router['api/token'] = {};
+router['api/token'].post = tokenHandlers.createToken;
+router['api/token'].get = tokenHandlers.getTokens;
+router['api/token'].put = tokenHandlers.editToken;
+router['api/token'].delete = tokenHandlers.removeToken;
 
-router.login = {};
-router.login.post = tokenHandlers.createToken;
+router['api/login'] = {};
+router['api/login'].post = tokenHandlers.createToken;
 
-router.logout = {};
-router.logout.post = tokenHandlers.removeToken;
+router['api/logout'] = {};
+router['api/logout'].post = tokenHandlers.removeToken;
 
-router.menuItem = {};
-router.menuItem.get = menuHandlers.getMenuItem;
-router.menuItem.post = menuHandlers.createMenuItem;
-router.menuItem.put = menuHandlers.editMenuItem;
-router.menuItem.delete = menuHandlers.removeMenuItem;
+router['api/menu'] = {};
+router['api/menu'].get = menuHandlers.getMenuItem;
+router['api/menu'].post = menuHandlers.createMenuItem;
+router['api/menu'].put = menuHandlers.editMenuItem;
+router['api/menu'].delete = menuHandlers.removeMenuItem;
 
-router.menuItems = {};
-router.menuItems.get = menuHandlers.getMenuItems;
+router['api/menu/list'] = {};
+router['api/menu/list'].get = menuHandlers.getMenuItems;
 
 
-router.cart = {};
-router.cart.get = cartHandlers.getCart;
-router.cart.post = cartHandlers.createCart;
-router.cart.delete = cartHandlers.removeCart;
+router['api/cart'] = {};
+router['api/cart'].get = cartHandlers.getCart;
+router['api/cart'].post = cartHandlers.createCart;
+router['api/cart'].delete = cartHandlers.removeCart;
 
 router['cart/add'] = {};
 router['cart/add'].put = cartHandlers.addToCart;
@@ -56,8 +55,8 @@ router['cart/add'].put = cartHandlers.addToCart;
 router['cart/remove'] = {};
 router['cart/remove'].put = cartHandlers.removeFromCart;
 
-router.payment = {};
-router.payment.post = paymentHandlers.pay;
+router['api/payment'] = {};
+router['api/payment'].post = paymentHandlers.pay;
 
 
 
