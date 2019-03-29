@@ -59,7 +59,8 @@ router['api/payment'].post = paymentHandlers.pay;
  */
 
 router['public'] = templateHandlers.publicAssets;
-router[''] = {};
-router[''].get = templateHandlers.index;
+router[''] = {get: templateHandlers.index};
+router['account/create'] = {get: templateHandlers.createAccount};
+router['login'] = {get: templateHandlers.login};
 
 module.exports = router;

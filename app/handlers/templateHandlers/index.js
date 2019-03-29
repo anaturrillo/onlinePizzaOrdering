@@ -1,8 +1,9 @@
-const getTemplate = require('./../../helpers/templateHelpers').getTemplate;
-const getPublic = require('./../../helpers/templateHelpers').getPublicAssets;
-const _formatError = require('../../helpers').formatError;
+const getTemplate = require('./../../helpers/templateHelpers').addBasicTemplates;
+const publicAssets = require('./publicAssets');
+const createAccount = require('./createAccount');
+const login = require('./login');
 
-const index = _ => getTemplate('index')
+const index = _ => getTemplate('index', {templateClass:'index'})
   .then(function (template) {
     return {
       statusCode: 200,
@@ -11,22 +12,6 @@ const index = _ => getTemplate('index')
     }
   });
 
-const publicAssets = function (data) {
-  const fileName = data.path.replace('public/', '');
-  const fileExtention = fileName.split('.')[1];
-  const types = [ 'css', 'png', 'jpg', 'ico'];
 
-  const type = types.includes(fileExtention)?fileExtention: 'plain';
 
-  return getPublic(fileName)
-    .then(function (template) {
-      return {
-        statusCode: 200,
-        response: template,
-        contentType: type
-      }
-    })
-    .catch(e => _formatError(400, `${data.method} /${data.path}`, `Unable to get ${fileName}`, e, data))
-};
-
-module.exports = {index, publicAssets};
+module.exports = {index, publicAssets, createAccount, login};
