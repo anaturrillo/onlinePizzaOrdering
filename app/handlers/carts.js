@@ -1,9 +1,10 @@
-const createError = require('./../helpers').createError;
+const _formatError = require('./../helpers').formatError;
 const createResponse = require('./../helpers').createResponse;
 const _data = require('./../data');
 const _validate = require('./../helpers/validate');
 const _errorToObject = require('./../helpers').errorToObject;
 const _createRandomString = require('./../helpers').createRandomString;
+const _catchError = require('./../helpers').catchError;
 
 /**
  * required:
@@ -14,7 +15,7 @@ const createCart = function (data) {
   const email = _validate.email(data.body.email);
   const token = data.headers.token;
 
-  if (!email ) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
+  if (!email ) return Promise.resolve(_formatError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
 
 
   const specs = {
@@ -28,7 +29,7 @@ const createCart = function (data) {
   return _validate.token(token,email)
     .then(_ => _data.create(specs))
     .then(cart => createResponse(200, 'Cart created successfully', cart))
-    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to create cart', _errorToObject(e), specs))
+    .catch(_catchError('Unable to create cart', {...data, processedSpecs:specs}))
 };
 
 /**
@@ -40,7 +41,7 @@ const getCart = function (data) {
   const email = _validate.email(data.query.email);
   const token = data.headers.token;
 
-  if (!email ) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
+  if (!email ) return Promise.resolve(_formatError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
 
   const specs = {
     collection: 'carts',
@@ -50,7 +51,7 @@ const getCart = function (data) {
   return _validate.token(token, email)
     .then(_ => _data.read(specs))
     .then(([cart, id])  => createResponse(200, 'ok', cart))
-    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to get cart', _errorToObject(e), specs))
+    .catch(_catchError('Unable to get cart', data))
 };
 
 /**
@@ -68,7 +69,7 @@ const addToCart = function (data) {
   const amount = item && _validate.amount(item.amount);
   const itemId = item.itemId;
 
-  if (!email || !amount || !item || !itemId) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
+  if (!email || !amount || !item || !itemId) return Promise.resolve(_formatError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
 
   const specs = {collection:'carts', id: email};
 
@@ -88,8 +89,8 @@ const addToCart = function (data) {
 
       return _data.update(specs)
     })
-    .then(cart=> createResponse(200, 'ok', cart))
-    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to get cart', _errorToObject(e), specs))
+    .then(cart=> createResponse(200, 'The item was added to the cart', cart))
+    .catch(_catchError('Unable to add item to cart', data))
 };
 
 /**
@@ -103,7 +104,7 @@ const removeFromCart = function (data) {
   const token = data.headers.token;
   const itemId = data.body.id;
 
-  if (!email || !itemId) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
+  if (!email || !itemId) return Promise.resolve(_formatError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
 
   const specs = {collection:'carts', id: email};
 
@@ -111,6 +112,11 @@ const removeFromCart = function (data) {
     .then(item => _data.read(specs))
     .then(function ([cart, id]) {
       const cartItems = cart.items || [];
+
+      if (!cartItems.find(e => e.id ===itemId)) {
+        throw _formatError(400, `${data.method} /${data.path}`, 'Item was not find in cart', null, data);
+      }
+
       const menuItems = cartItems.filter(e => e.id !== itemId);
       const specs = {
         collection: 'carts',
@@ -120,8 +126,8 @@ const removeFromCart = function (data) {
 
       return _data.update(specs)
     })
-    .then(cart=> createResponse(200, 'item add to cart', cart))
-    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to add item to cart', _errorToObject(e), specs))
+    .then(cart=> createResponse(200, 'The item was removed from the cart', cart))
+    .catch(_catchError('Unable to remove item from cart', data))
 };
 
 /**
@@ -133,14 +139,14 @@ const removeCart = function (data) {
   const email = _validate.email(data.query.email);
   const token = data.headers.token;
 
-  if (!email) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
+  if (!email) return Promise.resolve(_formatError(400, `${data.method} /${data.path}`, 'Missing required field', null, data));
 
   const specs = {collection:'carts', id: email};
 
   return _validate.token(token, email)
     .then(item => _data.remove(specs))
-    .then(cart=> createResponse(200, 'ok', cart))
-    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to remove cart', _errorToObject(e), specs))
+    .then(cart=> createResponse(200, 'Cart removed', cart))
+    .catch(_catchError('Unable to remove cart', data))
 };
 
 module.exports = {createCart, addToCart, removeFromCart, getCart, removeCart};

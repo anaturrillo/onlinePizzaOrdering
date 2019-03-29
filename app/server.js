@@ -46,6 +46,9 @@ const serverConfiguration = function (req, res) {
         res.writeHead(statusCode);
         res.end(body);
       })
+      .catch(function (e) {
+        debugger
+      })
       .catch(_log)
       .catch(console.error)
   });

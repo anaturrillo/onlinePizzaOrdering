@@ -49,15 +49,13 @@ router['api/cart'].get = cartHandlers.getCart;
 router['api/cart'].post = cartHandlers.createCart;
 router['api/cart'].delete = cartHandlers.removeCart;
 
-router['cart/add'] = {};
-router['cart/add'].put = cartHandlers.addToCart;
+router['api/cart/add'] = {};
+router['api/cart/add'].put = cartHandlers.addToCart;
 
-router['cart/remove'] = {};
-router['cart/remove'].put = cartHandlers.removeFromCart;
+router['api/cart/remove'] = {};
+router['api/cart/remove'].put = cartHandlers.removeFromCart;
 
 router['api/payment'] = {};
 router['api/payment'].post = paymentHandlers.pay;
-
-
 
 module.exports = router;

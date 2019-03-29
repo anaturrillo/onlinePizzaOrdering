@@ -1,5 +1,5 @@
 const https = require('https');
-const createError = require('./../helpers').createError;
+const _formatError  = require('./../helpers').formatError;
 const createResponse = require('./../helpers').createResponse;
 const _data = require('./../data');
 const querystring = require('querystring');
@@ -7,6 +7,7 @@ const _validate = require('./../helpers/validate');
 const errorToObject = require('./../helpers').errorToObject;
 const config = require('./../config');
 const createEmail = require('./../helpers/createEmail');
+const _catchError = require('./../helpers').catchError;
 
 const pay = function (data) {
   const path = `${data.method} /${data.path}`;
@@ -15,14 +16,17 @@ const pay = function (data) {
   const token = data.headers.token;
   const email = data.body.email;
 
-  if(!cartId) return Promise.resolve(createError(400, path, 'Missing cartId', null, null ));
-  if(!paymentToken) return Promise.resolve(createError(400, path, 'Missing paymentToken', null, null));
-  if(!token) return Promise.resolve(createError(400, path, 'Missing token', null, null));
-  if(!email) return Promise.resolve(createError(400, path, 'Missing email', null, null));
+  if(!cartId) return Promise.resolve(_formatError(400, path, 'Missing cartId', null, null ));
+  if(!paymentToken) return Promise.resolve(_formatError(400, path, 'Missing paymentToken', null, null));
+  if(!token) return Promise.resolve(_formatError(400, path, 'Missing token', null, null));
+  if(!email) return Promise.resolve(_formatError(400, path, 'Missing email', null, null));
 
   const getCart = _ => _data.read({collection:'carts', id:cartId});
 
   const getItems = function ([cart, _]) {
+    
+    if (!Array.isArray(cart.items)) throw _formatError(400, 'calculate amount', 'There are no items in the cart', {}, {})
+
     const getCartItems = cart.items.map(function (cartItem) {
       return _data.read({collection:'menu', id:cartItem.itemId})
         .then(function ([menuItem, _]) {
@@ -37,10 +41,13 @@ const pay = function (data) {
     return total + item.price * item.amount
   };
 
-  const calculateAmount = items => Promise.all([
-    items.reduce(addAmounts, 0)*100,
-    items
-  ]);
+  const calculateAmount = function (items) {
+    if (!Array.isArray(items)) throw _formatError(400, 'calculate amount', 'There are no items in the cart', {}, {})
+    return Promise.all([
+      items.reduce(addAmounts, 0)*100,
+      items
+    ])
+  };
 
   const sendPayment = function ([amount, items]) {
     const reqData = {
@@ -71,12 +78,12 @@ const pay = function (data) {
         if (status === 200 || status === 201) {
           resolve()
         } else {
-          reject(createError(500, path, `Unable to process payment. Request responded: ${status}`, {responseMsg: res.statusMessage}, {}))
+          reject(_formatError(500, path, `Unable to process payment. Request responded: ${status}`, {responseMsg: res.statusMessage}, {}))
         }
       });
 
       req.on('error', function (e) {
-        reject(createError(500, path, 'Unable to process payment', {response: e}, {}))
+        reject(_formatError(500, path, 'Unable to process payment', {response: e}, {}))
       });
 
       req.write(stringReqData);
@@ -131,14 +138,14 @@ const pay = function (data) {
         if (status === 200 || status === 201) {
           resolve(createResponse(200, 'Payment has been processed and user has been notified via email', order))
         } else {
-          resolve(createError(500, path, `Unable to send email. Request responded: ${status}`, {responseMsg: res.statusMessage}, {}))
+          resolve(_formatError(500, path, `Unable to send email. Request responded: ${status}`, {responseMsg: res.statusMessage}, {}))
         }
       });
 
       req.write(stringRequestData);
 
       req.on('error', function (e) {
-        resolve(createError(500, path, 'Unable to send email.', e, {}))
+        resolve(_formatError(500, path, 'Unable to send email.', e, {}))
       });
 
       req.end()
@@ -153,7 +160,7 @@ const pay = function (data) {
     .then(calculateAmount)
     .then(sendPayment)
     .then(sendEmail)
-    .catch(e => createError(e.statusCode || 400, path, 'Unable to update user', errorToObject(e), data))
+    .catch(_catchError('Unable to update user', data))
 };
 
 module.exports = {pay};

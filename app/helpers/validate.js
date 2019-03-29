@@ -1,18 +1,18 @@
 const _data = require('../data');
-const createError = require('./index').createError;
-const parseJsonToObject = require('./index').parseJsonToObject;
+const _formatError = require('./index').formatError;
 const hashPassword = require('./index').hashPassword;
 const _config = require('./../config');
 
 const validateToken = function (token, user) {
   const userToken = typeof token === 'string' && token;
-  if (!token) return Promise.reject(createError(400, 'validateToken', 'Missing required fields', null, {token, user}));
+
+  if (!token) return Promise.reject(_formatError(400, 'validateToken', 'Missing required fields', null, {token, user}));
 
   if (validate.isAdmin(token)) return Promise.resolve();
 
   const userName = typeof user === 'string' && user;
 
-  if (!userName) return Promise.reject(createError(400, 'validateToken', 'Missing required fields', null, {token, user}));
+  if (!userName) return Promise.reject(_formatError(400, 'validateToken', 'Missing required fields', null, {token, user}));
 
   const specs = {
     collection:'tokens',
@@ -21,12 +21,12 @@ const validateToken = function (token, user) {
 
   return _data.read(specs)
     .catch(function (e) {
-      if (e.code === 'ENOENT') throw {msg: 'Token not found', statusCode:403};
-      else throw e
+      if (e.code === 'ENOENT') throw _formatError(403, 'validateToken', 'Token not found', null, {token, user});
+      else throw _formatError(500, 'validateToken', 'Could not read token', null, {token, user});
     })
     .then(function ([file, fileId]) {
-      if (file.email === userName) return token;
-      else throw {msg: 'invalid token', statusCode: 403}
+      if (file.email === userName) return true;
+      else  throw _formatError(403, 'validateToken', 'Invalid token', null, {token, user});
     })
 };
 
@@ -40,10 +40,13 @@ const validatePassword = function (password, email) {
 
   return _data.read(specs)
     .catch(function (e) {
-      if (e.code === 'ENOENT') throw {msg: 'User not found'};
+      if (e.code === 'ENOENT') throw _formatError(403, 'validatePassword', 'User not found', {}, {});
       else throw e
     })
-    .then(user => user.password !== hashPassword)
+    .then(function ([user]) {
+      //debugger
+      if (user.password !== hashedPass) throw _formatError(403, 'validatePassword', 'Invalid password/user', {}, {})
+    })
   
 };
 

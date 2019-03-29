@@ -1,6 +1,14 @@
 const path = require('path');
-const parseJsonToObject = require('./helpers').parseJsonToObject;
 const {fsOpen, fsClose, fsWrite, fsRead, fsUnlink, fsTruncate, fsReadDir} = require('./helpers/promisifiedFs');
+
+//const parseJsonToObject = require('./../app/helpers/index').parseJsonToObject;
+const parseJsonToObject = function(str){
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return  {}
+  }
+};
 
 const baseDir = path.join(__dirname, '/../.data');
 

@@ -1,15 +1,16 @@
-const createError = require('./../helpers').createError;
+const _formatError = require('./../helpers').formatError;
 const createResponse = require('./../helpers').createResponse;
 const _data = require('./../data');
 const _validate = require('./../helpers/validate');
 const _errorToObject = require('./../helpers').errorToObject;
 const _createRandomString = require('./../helpers').createRandomString;
+const _catchError = require('./../helpers').catchError;
 
 const createToken = function (data) {
   const email = _validate.email(data.body.email);
   const password = data.body.password;
 
-  if (!email || !password) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required fields', null, data));
+  if (!email || !password) return Promise.resolve(_formatError(400, `${data.method} /${data.path}`, 'Missing required fields', null, data));
   const tokenId = _createRandomString(20);
   const specs = {
     collection: 'tokens',
@@ -21,15 +22,9 @@ const createToken = function (data) {
   };
 
   return _validate.password(password,email)
-    .then(function (isPasswordValid) {
-      if (isPasswordValid) {
-        return _data.create(specs)
-      } else {
-        throw {msg: 'Wrong password'}
-      }
-    })
+    .then(_ => _data.create(specs))
     .then(token => createResponse(200, 'Token created successfully', {forUser: email, token: token.id}))
-    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to create token', _errorToObject(e), specs))
+    .catch(_catchError('Unable to create token', {...data, processedSpecs:specs}))
 };
 
 const getTokens = function (data) {
@@ -44,7 +39,7 @@ const removeToken = function (data) {
   const token = data.headers.token;
   const email = _validate.email(data.query.email);
 
-  if (!token || !email) return Promise.resolve(createError(400, `${data.method} /${data.path}`, 'Missing required field',null, data))
+  if (!token || !email) return Promise.resolve(_formatError(400, `${data.method} /${data.path}`, 'Missing required field',null, data))
 
   const specs = {
     collection:'tokens',
@@ -54,7 +49,7 @@ const removeToken = function (data) {
   return _validate.token(token, email)
     .then(_ => _data.remove(specs))
     .then(_ => createResponse(200, 'Token removed successfully', {forUser: email, token: token}))
-    .catch(e => createError(400, `${data.method} /${data.path}`, 'Unable to remove token', _errorToObject(e), specs))
+    .catch(_catchError('Unable to remove token', {...data, processedSpecs:specs}))
 };
 
 module.exports = {createToken, getTokens, editToken, removeToken};

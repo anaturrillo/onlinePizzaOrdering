@@ -7,10 +7,11 @@ const errorMessage = {
   EEXIST: 'already exists'
 };
 
-const createError = function (statusCode, path, msg, error, data) {
+const formatError = function (statusCode, path, msg, error, data) {
   //@TODO discriminar los casos en los que hay que mandar 500
   //@TODO no mandar .info en NODE_ENV prod
   const errorData = {
+    isFormattedError: true,
     statusCode: statusCode || 400,
     response: {
       error: (msg && error && (errorMessage[error.code] || error.msg ) && `${msg} [${errorMessage[error.code] || error.msg}]` ) || msg || (error && (errorMessage[error.code] || error.msg)) || 'error indefinido',
@@ -22,7 +23,8 @@ const createError = function (statusCode, path, msg, error, data) {
     }
   };
 
-  return _log(errorData).then(_ => errorData);
+  //return _log(errorData).then(_ => errorData);
+  return errorData;
 };
 
 const createRandomString = function (strLength) {
@@ -63,4 +65,10 @@ const exclude = key => obj => {
   return obj
 };
 
-module.exports = {createError, parseJsonToObject, createResponse, errorToObject, hashPassword, exclude, createRandomString};
+const catchError = (msg, data, status) => function (e) {
+  //debugger
+  if (e.isFormattedError) return e;
+  else return formatError(status || 400, `${data.method} /${data.path}`, msg, errorToObject(e), data)
+};
+
+module.exports = {formatError, catchError, parseJsonToObject, createResponse, errorToObject, hashPassword, exclude, createRandomString};
