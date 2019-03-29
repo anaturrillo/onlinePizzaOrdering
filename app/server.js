@@ -29,15 +29,14 @@ const serverConfiguration = function (req, res) {
     const body = helpers.parseJsonToObject(buffer);
 
     let handler = router[path] && router[path][method] ? router[path][method] : router.notFound;
-
+    if (path.includes('public')) handler = router.public;
     const requestData = { path, method: method.toUpperCase(), body , query, headers};
 
     handler(requestData)
       .then(function (data) {
         const statusCode = typeof(data.statusCode) === 'number' ? data.statusCode : 200;
-        const response = typeof(data.response) === 'object' ? data.response : {};
         const type = typeof data.contentType === 'string' ? data.contentType : 'json';
-        const respond = prepareResponse(response);
+        const respond = prepareResponse(data.response);
 
         const contentType = respond[type].contentType;
         const body = respond[type].body;

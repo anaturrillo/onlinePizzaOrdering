@@ -13,7 +13,7 @@ module.exports = function (body) {
       contentType: 'image/x-icon'
     },
     css: {
-      body: typeof(body) !== 'string' ? body : '',
+      body: typeof(body) === 'string' ? body : '',
       contentType: 'text/css'
     },
     png: {
