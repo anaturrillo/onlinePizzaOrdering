@@ -24,7 +24,7 @@ const pay = function (data) {
   const getCart = _ => _data.read({collection:'carts', id:cartId});
 
   const getItems = function ([cart, _]) {
-    
+
     if (!Array.isArray(cart.items)) throw _formatError(400, 'calculate amount', 'There are no items in the cart', {}, {})
 
     const getCartItems = cart.items.map(function (cartItem) {
